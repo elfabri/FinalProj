@@ -8,17 +8,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float m_JumpForce = 2200;
     private bool jump = false;
     [Range(0, .3f)] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-    public bool m_Grounded = true;
+    private bool m_Grounded = true;
     private Vector3 m_Velocity = Vector3.zero;
     private Rigidbody2D player;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         player = GetComponent<Rigidbody2D>();
     }
 
-    // Update is called once per frame
     void Update()
     {
         horizontalInput = Input.GetAxisRaw("Horizontal") * runSpeed;
@@ -32,11 +30,6 @@ public class PlayerController : MonoBehaviour
     {
         if (horizontalInput != 0 || jump) {
             Move(horizontalInput * Time.fixedDeltaTime, jump);
-            /*
-            if (jump) {
-                Debug.Log("We should jump!");
-            }
-            */
         }
         jump = false;
     }
@@ -49,7 +42,7 @@ public class PlayerController : MonoBehaviour
         player.linearVelocity = Vector3.SmoothDamp(player.linearVelocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
         if (jump) {
-            Debug.Log("We should jump!");
+            // Debug.Log("We should jump!");
             Jump();
         }
     }
