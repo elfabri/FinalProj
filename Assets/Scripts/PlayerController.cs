@@ -11,6 +11,7 @@ public class PlayerController : MonoBehaviour
     private bool m_Grounded = true;
     private Vector3 m_Velocity = Vector3.zero;
     private Rigidbody2D player;
+    [SerializeField] private MenuesManager menus;
 
     void Start()
     {
@@ -19,6 +20,9 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        if (menus.Paused || !menus.Started || menus.Died) {
+            return;
+        }
         horizontalInput = Input.GetAxisRaw("Horizontal") * runSpeed;
         if (Input.GetKeyDown(KeyCode.Space) && m_Grounded) {
             m_Grounded = false;
