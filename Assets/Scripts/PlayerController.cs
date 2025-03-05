@@ -7,8 +7,10 @@ public class PlayerController : MonoBehaviour
     private float horizontalInput = 0f;
     [SerializeField] private float m_JumpForce = 2200;
     private bool jump = false;
+    [SerializeField] private float jumpBufferTime = 0.2f;
+    private float jumpBufferCounter;
+    [SerializeField] private bool m_Grounded = true;
     [Range(0, .3f)] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-    private bool m_Grounded = true;
     private Vector3 m_Velocity = Vector3.zero;
     private Rigidbody2D player;
     [SerializeField] private MenuesManager menus;
@@ -24,9 +26,19 @@ public class PlayerController : MonoBehaviour
             return;
         }
         horizontalInput = Input.GetAxisRaw("Horizontal") * runSpeed;
-        if (Input.GetKeyDown(KeyCode.Space) && m_Grounded) {
-            m_Grounded = false;
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            jumpBufferCounter = jumpBufferTime;
+
+        } else {
+            jumpBufferCounter -= Time.deltaTime;
+        }
+
+        if (jumpBufferCounter > 0 && m_Grounded)
+        {
             jump = true;
+            jumpBufferCounter = 0;
         }
     }
 
@@ -46,7 +58,6 @@ public class PlayerController : MonoBehaviour
         player.linearVelocity = Vector3.SmoothDamp(player.linearVelocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
 
         if (jump) {
-            // Debug.Log("We should jump!");
             Jump();
         }
     }
@@ -54,6 +65,7 @@ public class PlayerController : MonoBehaviour
     public void Jump()
     {
         player.AddForce(new Vector2(0f, m_JumpForce));
+        m_Grounded = false;
     }
 
     void OnCollisionEnter2D(Collision2D col) {
