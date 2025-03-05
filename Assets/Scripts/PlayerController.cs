@@ -10,6 +10,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float jumpBufferTime = 0.2f;
     private float jumpBufferCounter;
     [SerializeField] private bool m_Grounded = true;
+    [SerializeField] private bool m_Falling = false;
     [Range(0, .3f)] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
     private Vector3 m_Velocity = Vector3.zero;
     private Rigidbody2D player;
@@ -40,6 +41,13 @@ public class PlayerController : MonoBehaviour
             jump = true;
             jumpBufferCounter = 0;
         }
+
+        if ((Input.GetKeyUp(KeyCode.Space) || player.linearVelocityY < 0)
+                && !m_Grounded)
+        {
+            m_Falling = true;
+            SoftDrop();
+        }
     }
 
     void FixedUpdate()
@@ -68,9 +76,18 @@ public class PlayerController : MonoBehaviour
         m_Grounded = false;
     }
 
+    void SoftDrop()
+    {
+        if (m_Falling) {
+            player.gravityScale = 2.5f;
+        }
+    }
+
     void OnCollisionEnter2D(Collision2D col) {
         if (col.gameObject.CompareTag("Ground"))
             m_Grounded = true;
+            player.gravityScale = 1.0f;
+            m_Falling = false;
 
         // if (col.gameObject.CompareTag("Enemy") && hasStarted)
             // PlayerTriggers("hit");
