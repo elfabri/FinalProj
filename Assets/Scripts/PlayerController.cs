@@ -3,22 +3,29 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    [SerializeField] private float runSpeed = 200f;
+    [SerializeField] private float runSpeed = 40f;
     private float horizontalInput = 0f;
-    [SerializeField] private float m_JumpForce = 2200;
+    [SerializeField] private float _jumpForce = 8;
     private bool jump = false;
     [SerializeField] private float jumpBufferTime = 0.2f;
     private float jumpBufferCounter;
-    [SerializeField] private bool m_Grounded = true;
-    [SerializeField] private bool m_Falling = false;
-    [Range(0, .3f)] private float m_MovementSmoothing = .05f;	// How much to smooth out the movement
-    private Vector3 m_Velocity = Vector3.zero;
+    [SerializeField] private bool _grounded = true;
+    [SerializeField][Range(0, .3f)] private float _movementSmoothing = .1f;	// How much to smooth out the movement
+    private Vector3 _velocity = Vector3.zero;
     private Rigidbody2D player;
     [SerializeField] private MenuesManager menus;
+    [SerializeField] private GameObject _footPos;
+    private bool _facingRight = true;  // starts facing right
+    private bool _falling = false;
+    private float airVel = 0.5f;
+    private float xMov;
+
+    private Animator animator;
 
     void Start()
     {
         player = GetComponent<Rigidbody2D>();
+        animator = GetComponent<Animator>();
     }
 
     void Update()
@@ -26,6 +33,7 @@ public class PlayerController : MonoBehaviour
         if (menus.Paused || !menus.Started || menus.Died) {
             return;
         }
+
         horizontalInput = Input.GetAxisRaw("Horizontal") * runSpeed;
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -36,60 +44,79 @@ public class PlayerController : MonoBehaviour
             jumpBufferCounter -= Time.deltaTime;
         }
 
-        if (jumpBufferCounter > 0 && m_Grounded)
+        if (jumpBufferCounter > 0 && _grounded)
         {
             jump = true;
             jumpBufferCounter = 0;
-        }
-
-        if ((Input.GetKeyUp(KeyCode.Space) || player.linearVelocityY < 0)
-                && !m_Grounded)
-        {
-            m_Falling = true;
-            SoftDrop();
         }
     }
 
     void FixedUpdate()
     {
-        if (horizontalInput != 0 || jump) {
-            Move(horizontalInput * Time.fixedDeltaTime, jump);
-        }
-        jump = false;
+        if (horizontalInput != 0) Move(horizontalInput);
+        if (jump) Jump();
+        if (player.linearVelocityY < 0) SoftDrop();
+        animator.SetFloat("Speed", Mathf.Abs(player.linearVelocity.x));
+        animator.SetFloat("YSpeed", player.linearVelocity.y);
     }
 
-    public void Move(float move, bool jump)
+    public void Move(float move)
     {
-        // Move the character by finding the target velocity
-        Vector3 targetVelocity = new Vector2(move * 10f, player.linearVelocity.y);
-        // And then smoothing it out and applying it to the character
-        player.linearVelocity = Vector3.SmoothDamp(player.linearVelocity, targetVelocity, ref m_Velocity, m_MovementSmoothing);
+        xMov = move * Time.fixedDeltaTime;
 
-        if (jump) {
-            Jump();
-        }
+        if (!_grounded) xMov *= airVel;
+
+        // Move the character by finding the target velocity
+        Vector3 targetVelocity = new Vector2(xMov * 10f, player.linearVelocity.y);
+        // And then smoothing it out and applying it to the character
+        player.linearVelocity = Vector3.SmoothDamp(player.linearVelocity, targetVelocity, ref _velocity, _movementSmoothing);
+
+        if (move > 0 && !_facingRight)
+        {
+			Flip();
+		}
+        else if (move < 0 && _facingRight)
+        {
+			Flip();
+		}
+
     }
 
     public void Jump()
     {
-        player.AddForce(new Vector2(0f, m_JumpForce));
-        m_Grounded = false;
+        player.linearVelocityY = _jumpForce;
+        _grounded = false;
+        jump = false;
     }
 
     void SoftDrop()
     {
-        if (m_Falling) {
-            player.gravityScale = 2.5f;
+        if (!_falling)
+        {
+            _falling = true;
+            player.gravityScale = 3.0f;
         }
     }
 
-    void OnCollisionEnter2D(Collision2D col) {
+    void OnCollisionEnter2D(Collision2D col)
+    {
         if (col.gameObject.CompareTag("Ground"))
-            m_Grounded = true;
-            player.gravityScale = 1.0f;
-            m_Falling = false;
-
-        // if (col.gameObject.CompareTag("Enemy") && hasStarted)
-            // PlayerTriggers("hit");
+        {
+            if (col.transform.position.y < _footPos.transform.position.y)
+            {
+                _grounded = true;
+                player.gravityScale = 1.0f;
+            }
+        }
     }
+
+	private void Flip() {
+		// Switch the way the player is labelled as facing.
+		_facingRight = !_facingRight;
+
+		// Multiply the player's x local scale by -1.
+		Vector3 theScale = transform.localScale;
+		theScale.x *= -1;
+		transform.localScale = theScale;
+	}
 }
