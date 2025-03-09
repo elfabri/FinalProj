@@ -6,13 +6,13 @@ public class MenuesManager : MonoBehaviour
     [SerializeField] private Canvas start;
     [SerializeField] private Canvas pause;
     [SerializeField] private Canvas death;
-    [SerializeField] private bool m_Started = false;
-    [SerializeField] private bool m_Paused = false;
-    [SerializeField] private bool m_Died = false;
+    [SerializeField] private bool _Started = false;
+    [SerializeField] private bool _Paused = false;
+    [SerializeField] private bool _Died = false;
 
     void Update()
     {
-        if (!m_Started)
+        if (!_Started)
         {
             if (Input.GetKey(KeyCode.Return))
             {
@@ -22,9 +22,9 @@ public class MenuesManager : MonoBehaviour
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape) && !m_Died)
+        if (Input.GetKeyDown(KeyCode.Escape) && !_Died)
         {
-            if (m_Paused)
+            if (_Paused)
             {
                 continueGame();
             } else {
@@ -38,21 +38,21 @@ public class MenuesManager : MonoBehaviour
     {
         Time.timeScale = 1f;
         start.gameObject.SetActive(false);
-        m_Started = true;
+        _Started = true;
     }
 
     void pauseGame()
     {
         Time.timeScale = 0f;
         pause.gameObject.SetActive(true);
-        m_Paused = true;
+        _Paused = true;
     }
 
     public void continueGame()
     {
         Time.timeScale = 1f;
         pause.gameObject.SetActive(false);
-        m_Paused = false;
+        _Paused = false;
     }
 
     public void restartGame()
@@ -62,19 +62,19 @@ public class MenuesManager : MonoBehaviour
 
     void endGame()
     {
-        m_Died = true;
+        _Died = true;
         death.gameObject.SetActive(true);
     }
 
     public bool Paused {
-        get { return m_Paused; }
+        get { return _Paused; }
     }
 
     public bool Died {
-        get { return m_Died; }
+        get { return _Died; }
     }
 
     public bool Started {
-        get { return m_Started; }
+        get { return _Started; }
     }
 }
