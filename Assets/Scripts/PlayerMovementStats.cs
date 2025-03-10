@@ -4,7 +4,7 @@ using UnityEngine;
 public class PlayerMovementStats : ScriptableObject
 {
     [Header("Move")]
-    [Range(1f, 100f)] public float MaxMoveSpeed = 15.8f;
+    [Range(1f, 100f)] public float MaxMoveSpeed = 10f;
     [Range(0.25f, 50f)] public float GroundAcceleration = 5f;
     [Range(0.25f, 50f)] public float GroundDeceleration = 20f;
     [Range(0.25f, 50f)] public float AirAcceleration = 5f;
@@ -17,9 +17,9 @@ public class PlayerMovementStats : ScriptableObject
     [Range(0f, 1f)] public float HeadWidth = 0.75f;
 
     [Header("Jump")]
-    public float JumpHeight = 6.5f;
+    public float JumpHeight = 2.8f;
     [Range(1f, 1.1f)] public float JumpHeightCompensationFactor = 1.054f;
-    public float TimeTillJumpApex = 0.35f;
+    public float TimeTillJumpApex = 0.3f;
     [Range(0.01f, 5f)] public float GravityOnReleaseMultiplier = 2f;
     public float MaxFallSpeed = 26f;
     [Range(1, 5)] public int NumberOfJumpsAllowed = 1;
