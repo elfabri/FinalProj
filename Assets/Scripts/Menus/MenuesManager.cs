@@ -6,53 +6,30 @@ public class MenuesManager : MonoBehaviour
     [SerializeField] private Canvas start;
     [SerializeField] private Canvas pause;
     [SerializeField] private Canvas death;
-    [SerializeField] private bool _Started = false;
-    [SerializeField] private bool _Paused = false;
-    [SerializeField] private bool _Died = false;
-
-    void Update()
-    {
-        if (!_Started)
-        {
-            if (Input.GetKey(KeyCode.Return))
-            {
-                startGame();
-            } else {
-                return;
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Escape) && !_Died)
-        {
-            if (_Paused)
-            {
-                continueGame();
-            } else {
-                pauseGame();
-            }
-        }
-    }
+    [SerializeField] private bool _started = false;
+    [SerializeField] private bool _paused = false;
+    [SerializeField] private bool _died = false;
 
     // menus btns behaviour
     public void startGame()
     {
         Time.timeScale = 1f;
         start.gameObject.SetActive(false);
-        _Started = true;
+        _started = true;
     }
 
-    void pauseGame()
+    public void pauseGame()
     {
         Time.timeScale = 0f;
         pause.gameObject.SetActive(true);
-        _Paused = true;
+        _paused = true;
     }
 
     public void continueGame()
     {
         Time.timeScale = 1f;
         pause.gameObject.SetActive(false);
-        _Paused = false;
+        _paused = false;
     }
 
     public void restartGame()
@@ -62,19 +39,19 @@ public class MenuesManager : MonoBehaviour
 
     void endGame()
     {
-        _Died = true;
+        _died = true;
         death.gameObject.SetActive(true);
     }
 
     public bool Paused {
-        get { return _Paused; }
+        get { return _paused; }
     }
 
     public bool Died {
-        get { return _Died; }
+        get { return _died; }
     }
 
     public bool Started {
-        get { return _Started; }
+        get { return _started; }
     }
 }
