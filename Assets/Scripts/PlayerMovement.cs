@@ -41,6 +41,9 @@ public class PlayerMovement : MonoBehaviour
     // coyote time vars
     private float _coyoteTimer;
 
+    [Header("Menu Stuff")]
+    [SerializeField] private MenuesManager menuMan;
+
     void Awake()
     {
         _isFacingRight = true;
@@ -49,12 +52,16 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+        if (!menuMan.Started) return;
+        PauseChecks();
+        if (menuMan.Paused || menuMan.Died) return;
         CountTimers();
         JumpChecks();
     }
 
     void FixedUpdate()
     {
+        if (!menuMan.Started || menuMan.Paused || menuMan.Died) return;
         CollisionChecks();
         Jump();
 
@@ -281,6 +288,24 @@ public class PlayerMovement : MonoBehaviour
         VerticalVelocity = Mathf.Clamp(VerticalVelocity, -MoveStats.MaxFallSpeed, 50f);
 
         _rb.linearVelocity = new Vector2(_rb.linearVelocityX, VerticalVelocity);
+    }
+    #endregion
+
+    #region Pause
+    private void PauseChecks()
+    {
+        // Jump button pressed
+        if (InputManager.UiCancelPressed)
+        {
+            if (menuMan.Paused)
+            {
+                menuMan.continueGame();
+            }
+            else
+            {
+                menuMan.pauseGame();
+            }
+        }
     }
     #endregion
 
