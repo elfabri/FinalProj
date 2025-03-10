@@ -41,6 +41,10 @@ public class PlayerMovement : MonoBehaviour
     // coyote time vars
     private float _coyoteTimer;
 
+    // animations
+    private Animator _anim;
+    private float _absSpeed;
+
     [Header("Menu Stuff")]
     [SerializeField] private MenuesManager menuMan;
 
@@ -48,6 +52,7 @@ public class PlayerMovement : MonoBehaviour
     {
         _isFacingRight = true;
         _rb = GetComponent<Rigidbody2D>();
+        _anim = GetComponent<Animator>();
     }
 
     void Update()
@@ -79,6 +84,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move(float acceleration, float deceleration, Vector2 moveInput)
     {
+        _absSpeed = Mathf.Abs(moveInput.magnitude);
+        _anim.SetFloat("Speed", _absSpeed);
         if (moveInput != Vector2.zero)
         {
             // check if it needs to turn
@@ -325,11 +332,7 @@ public class PlayerMovement : MonoBehaviour
                 MoveStats.GroundLayer
             );
 
-        if (_groundHit.collider != null)
-        {
-            _isGrounded = true;
-        }
-        else { _isGrounded = false; }
+        _isGrounded = _groundHit.collider != null ? true : false;
 
         #region Debug Visualization
         if (MoveStats.DebugShowIsGroundedBox)
@@ -369,8 +372,16 @@ public class PlayerMovement : MonoBehaviour
     private void CollisionChecks()
     {
         IsGrounded();
+        // if not grounded, update YSpeed on animator
+        if (!_isGrounded)
+        {
+            _anim.SetFloat("YSpeed", VerticalVelocity);
+        }
+        else
+        {
+            _anim.SetFloat("YSpeed", 0f);
+        }
     }
-
     #endregion
 
     #region Timers
