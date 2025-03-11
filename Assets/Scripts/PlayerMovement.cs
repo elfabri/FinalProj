@@ -4,6 +4,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("References")]
     public PlayerMovementStats MoveStats;
+    public PlayerAttackStats AttackStats;
     [SerializeField] private Collider2D _feetCol;
     [SerializeField] private Collider2D _bodyCol;
 
@@ -43,7 +44,11 @@ public class PlayerMovement : MonoBehaviour
 
     // animations
     private Animator _anim;
-    private float _absSpeed;
+    private float _lockedTill;
+    private int _currentState;
+    private bool _isAttacking_1;
+    private bool _isAttacking_2;
+    // jump and falling already asigned
 
     [Header("Menu Stuff")]
     [SerializeField] private MenuesManager menuMan;
@@ -62,6 +67,7 @@ public class PlayerMovement : MonoBehaviour
         if (menuMan.Paused || menuMan.Died) return;
         CountTimers();
         JumpChecks();
+        AnimStates();
     }
 
     void FixedUpdate()
@@ -84,8 +90,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move(float acceleration, float deceleration, Vector2 moveInput)
     {
-        _absSpeed = Mathf.Abs(moveInput.magnitude);
-        _anim.SetFloat("Speed", _absSpeed);
+        // _absSpeed = Mathf.Abs(moveInput.magnitude);
+        // _anim.SetFloat("Speed", _absSpeed);
         if (moveInput != Vector2.zero)
         {
             // check if it needs to turn
@@ -372,15 +378,6 @@ public class PlayerMovement : MonoBehaviour
     private void CollisionChecks()
     {
         IsGrounded();
-        // if not grounded, update YSpeed on animator
-        if (!_isGrounded)
-        {
-            _anim.SetFloat("YSpeed", VerticalVelocity);
-        }
-        else
-        {
-            _anim.SetFloat("YSpeed", 0f);
-        }
     }
     #endregion
 
@@ -394,6 +391,37 @@ public class PlayerMovement : MonoBehaviour
             _coyoteTimer -= Time.deltaTime;
         }
         else { _coyoteTimer = MoveStats.JumpCoyoteTime; }
+    }
+    #endregion
+
+    #region Animations States Handler
+    private void AnimStates()
+    {
+        var state = GetState();
+
+        if (state == _currentState) return;
+        _anim.CrossFade(state, 0, 0);
+        _currentState = state;
+    }
+
+    private int GetState()
+    {
+        if (Time.time < _lockedTill) { return _currentState; }
+
+        // most to less important
+        if (_isAttacking_2) return LockState(PlayerAnimations.Attack_2, AttackStats.A2MinTime);
+        if (_isAttacking_1) return LockState(PlayerAnimations.Attack_1, AttackStats.A1MinTime);
+
+        if (_isGrounded)
+            return InputManager.Movement.magnitude == 0 ? PlayerAnimations.Idle : PlayerAnimations.Run;
+
+        return VerticalVelocity > 0 ? PlayerAnimations.Jump : PlayerAnimations.Fall;
+
+        int LockState(int s, float t)
+        {
+            _lockedTill = Time.time + t;
+            return s;
+        }
     }
     #endregion
 }

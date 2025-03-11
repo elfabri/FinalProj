@@ -1305,7 +1305,7 @@ Transform:
   m_GameObject: {fileID: 672091022}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -6.45, y: -3.58, z: 0}
+  m_LocalPosition: {x: -6.45, y: -3.61, z: 0}
   m_LocalScale: {x: 4.12, y: 4.12, z: 4.12}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -1404,12 +1404,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   MoveStats: {fileID: 11400000, guid: a31b6335c68ced949a113cf7f4348327, type: 2}
+  AttackStats: {fileID: 11400000, guid: b3fb971ea395e9a488aa232649575836, type: 2}
   _feetCol: {fileID: 885567231}
   _bodyCol: {fileID: 214744734}
   _isGrounded: 0
   _isJumping: 0
   _isFalling: 0
-  _numberOfJumpsUsed: 0
+  _numberOfJumpsUsed: 1
   menuMan: {fileID: 1083218713}
 --- !u!1 &686291192
 GameObject:
