@@ -1,0 +1,19 @@
+using UnityEngine;
+
+[CreateAssetMenu(fileName = "PlayerAttackStats", menuName = "Player Attack")]
+public class PlayerAttackStats : ScriptableObject
+{
+    // minimum times to run anims
+    [Header("Attacks Timers")]
+    [Range(0.1f, 1f)] public float A1MinTime = 0.2f;
+    [Range(0.1f, 1f)] public float A2MinTime = 0.2f;
+
+    // window time after the first attack
+    // to cast the next
+    [Range(0.1f, 1f)] public float AttackComboTimer = 0.2f;
+
+    // cooldown time
+    [Range(0.2f, 5f)] public float CoolDown = 3f;
+
+    // TODO add damages values and critic probability
+}
