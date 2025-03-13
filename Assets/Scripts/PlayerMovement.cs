@@ -46,9 +46,15 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     private float _lockedTill;
     private int _currentState;
-    private bool _isAttacking_1;
-    private bool _isAttacking_2;
+    [SerializeField] private bool _isAttacking_1;
+    [SerializeField] private bool _isAttacking_2;
+    [SerializeField] private float _attack_1_AnimTime;
     // jump and falling already asigned
+
+    // attack vars
+    // is attacking 1 and 2 already asigned
+    [SerializeField] private float _attackCD;
+    [SerializeField] private bool _attackCoolingDown;
 
     [Header("Menu Stuff")]
     [SerializeField] private MenuesManager menuMan;
@@ -67,6 +73,7 @@ public class PlayerMovement : MonoBehaviour
         if (menuMan.Paused || menuMan.Died) return;
         CountTimers();
         JumpChecks();
+        AttackChecks();
         AnimStates();
     }
 
@@ -384,6 +391,7 @@ public class PlayerMovement : MonoBehaviour
     #region Timers
     private void CountTimers()
     {
+        // jump
         _jumpBufferTimer -= Time.deltaTime;
 
         if (!_isGrounded)
@@ -391,6 +399,28 @@ public class PlayerMovement : MonoBehaviour
             _coyoteTimer -= Time.deltaTime;
         }
         else { _coyoteTimer = MoveStats.JumpCoyoteTime; }
+
+        // attack
+        if (_attackCoolingDown && _attackCD > 0)
+        {
+            _attackCD -= Time.deltaTime;
+        }
+        else
+        {
+            _attackCoolingDown = false;
+            _attackCD = AttackStats.CoolDown;
+        }
+
+        // attack 1
+        if (_isAttacking_1 && _attack_1_AnimTime > 0)
+        {
+            _attack_1_AnimTime -= Time.deltaTime;
+        }
+        else
+        {
+            _isAttacking_1 = false;
+            _attack_1_AnimTime = AttackStats.A1MinTime;
+        }
     }
     #endregion
 
@@ -421,6 +451,24 @@ public class PlayerMovement : MonoBehaviour
         {
             _lockedTill = Time.time + t;
             return s;
+        }
+    }
+    #endregion
+
+    #region Attack
+    private void AttackChecks()
+    {
+        if (InputManager.Attack_1_WasPressed)
+        {
+            // attack is on coolDown
+            if (_attackCD != AttackStats.CoolDown) return;
+
+            // initiate Attack and control cd
+            _isAttacking_1 = true;
+            _attackCoolingDown = true;
+
+            // attack released (heavy attack) TODO
+            // attack pressed under window to activate combo TODO
         }
     }
     #endregion
