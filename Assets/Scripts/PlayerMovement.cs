@@ -72,7 +72,13 @@ public class PlayerMovement : MonoBehaviour
         PauseChecks();
         if (menuMan.Paused || menuMan.Died) return;
         CountTimers();
-        JumpChecks();
+
+        // no jumps while attacking
+        if (_isAttacking_1 || _isAttacking_2)
+        {
+            return;
+        }
+        else { JumpChecks(); }
         AttackChecks();
         AnimStates();
     }
@@ -81,6 +87,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (!menuMan.Started || menuMan.Paused || menuMan.Died) return;
         CollisionChecks();
+
         Jump();
 
         if (_isGrounded)
@@ -400,7 +407,7 @@ public class PlayerMovement : MonoBehaviour
         }
         else { _coyoteTimer = MoveStats.JumpCoyoteTime; }
 
-        // attack
+        // general attack cd
         if (_attackCoolingDown && _attackCD > 0)
         {
             _attackCD -= Time.deltaTime;
@@ -411,7 +418,7 @@ public class PlayerMovement : MonoBehaviour
             _attackCD = AttackStats.CoolDown;
         }
 
-        // attack 1
+        // attack 1 animation check
         if (_isAttacking_1 && _attack_1_AnimTime > 0)
         {
             _attack_1_AnimTime -= Time.deltaTime;
@@ -460,6 +467,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (InputManager.Attack_1_WasPressed)
         {
+            // cant attack while on air
+            if (!_isGrounded) return;
+
             // attack is on coolDown
             if (_attackCD != AttackStats.CoolDown) return;
 
