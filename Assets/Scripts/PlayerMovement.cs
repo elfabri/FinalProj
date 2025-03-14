@@ -46,15 +46,20 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     private float _lockedTill;
     private int _currentState;
+    [SerializeField] private bool _preAttacking_1;
     [SerializeField] private bool _isAttacking_1;
+    [SerializeField] private bool _preAttacking_2;
     [SerializeField] private bool _isAttacking_2;
+    [SerializeField] private bool _isHeavyAttacking;
     [SerializeField] private float _attack_1_AnimTime;
+    [SerializeField] private float _attack_2_AnimTime;
+    [SerializeField] private float _attack_H_AnimTime;
     // jump and falling already asigned
 
     // attack vars
     // is attacking 1 and 2 already asigned
-    [SerializeField] private float _attackCD;
-    [SerializeField] private bool _attackCoolingDown;
+    [SerializeField] private float _attackComboTime = -1;
+    [SerializeField] private float _heavyTime;  // time to hold to trigger heavy attack
 
     [Header("Menu Stuff")]
     [SerializeField] private MenuesManager menuMan;
@@ -73,14 +78,14 @@ public class PlayerMovement : MonoBehaviour
         if (menuMan.Paused || menuMan.Died) return;
         CountTimers();
 
+        AttackChecks();
+        AnimStates();
         // no jumps while attacking
-        if (_isAttacking_1 || _isAttacking_2)
+        if (isAttacking())
         {
             return;
         }
         else { JumpChecks(); }
-        AttackChecks();
-        AnimStates();
     }
 
     void FixedUpdate()
@@ -104,10 +109,13 @@ public class PlayerMovement : MonoBehaviour
 
     private void Move(float acceleration, float deceleration, Vector2 moveInput)
     {
-        // _absSpeed = Mathf.Abs(moveInput.magnitude);
-        // _anim.SetFloat("Speed", _absSpeed);
         if (moveInput != Vector2.zero)
         {
+            // cancel attacks anims while moving
+            _preAttacking_1 = false;
+            _preAttacking_2 = false;
+            _isHeavyAttacking = false;
+
             // check if it needs to turn
             if (moveInput.x > 0 && !_isFacingRight)
             {
@@ -407,26 +415,10 @@ public class PlayerMovement : MonoBehaviour
         }
         else { _coyoteTimer = MoveStats.JumpCoyoteTime; }
 
-        // general attack cd
-        if (_attackCoolingDown && _attackCD > 0)
+        // attack combo time check
+        if (_preAttacking_2 && _attackComboTime > 0)
         {
-            _attackCD -= Time.deltaTime;
-        }
-        else
-        {
-            _attackCoolingDown = false;
-            _attackCD = AttackStats.CoolDown;
-        }
-
-        // attack 1 animation check
-        if (_isAttacking_1 && _attack_1_AnimTime > 0)
-        {
-            _attack_1_AnimTime -= Time.deltaTime;
-        }
-        else
-        {
-            _isAttacking_1 = false;
-            _attack_1_AnimTime = AttackStats.A1MinTime;
+            _attackComboTime -= Time.deltaTime;
         }
     }
     #endregion
@@ -446,8 +438,26 @@ public class PlayerMovement : MonoBehaviour
         if (Time.time < _lockedTill) { return _currentState; }
 
         // most to less important
-        if (_isAttacking_2) return LockState(PlayerAnimations.Attack_2, AttackStats.A2MinTime);
-        if (_isAttacking_1) return LockState(PlayerAnimations.Attack_1, AttackStats.A1MinTime);
+        if (_isHeavyAttacking)
+        {
+            _isHeavyAttacking = false;
+            return LockState(PlayerAnimations.HeavyAttack, AttackStats.HAMinTime);
+        }
+
+        if (_isAttacking_2)
+        {
+            _isAttacking_2 = false;
+            return LockState(PlayerAnimations.Attack_2, AttackStats.A2MinTime);
+        }
+
+        if (_isAttacking_1)
+        {
+            _isAttacking_1 = false;
+            return LockState(PlayerAnimations.Attack_1, AttackStats.A1MinTime);
+        }
+
+        if (_preAttacking_1) return PlayerAnimations.PreAttack_1;
+        if (_preAttacking_2) return PlayerAnimations.PreAttack_2;
 
         if (_isGrounded)
             return InputManager.Movement.magnitude == 0 ? PlayerAnimations.Idle : PlayerAnimations.Run;
@@ -465,21 +475,61 @@ public class PlayerMovement : MonoBehaviour
     #region Attack
     private void AttackChecks()
     {
+        /* as with normal attacks in genshin impact (swords),
+         * you hold attack for a bit and you may trigger
+         * a heavy attack, else, if you press
+         * the attack button again in a short time, you trigger
+         * the next normal attack
+         */
         if (InputManager.Attack_1_WasPressed)
         {
             // cant attack while on air
             if (!_isGrounded) return;
 
-            // attack is on coolDown
-            if (_attackCD != AttackStats.CoolDown) return;
-
-            // initiate Attack and control cd
-            _isAttacking_1 = true;
-            _attackCoolingDown = true;
-
-            // attack released (heavy attack) TODO
-            // attack pressed under window to activate combo TODO
+            if (_preAttacking_2 && _attackComboTime > 0)
+            {
+                _preAttacking_2 = false;
+                _isAttacking_2 = true;
+                _attackComboTime = -1;
+            }
+            else
+            {
+                // initiate Attack 1
+                _preAttacking_1 = true;
+                _attackComboTime = AttackStats.TriggerComboTime;
+                _heavyTime = Time.time + AttackStats.TriggerHeavyTime;
+            }
         }
+
+        if (InputManager.Attack_1_WasReleased)
+        {
+            // heavy Attack
+            if (Time.time >= _heavyTime && !_isAttacking_2 && _preAttacking_1)
+            {
+                _preAttacking_1 = false;
+                _isHeavyAttacking = true;
+            }
+
+            // normal attack 1
+            else if (_preAttacking_1)
+            {
+                _preAttacking_1 = false;
+                _isAttacking_1 = true;
+                _preAttacking_2 = true;
+            }
+        }
+
+        if (_attackComboTime <= 0)
+        {
+            _preAttacking_2 = false;
+            _attackComboTime = AttackStats.TriggerComboTime;
+        }
+    }
+
+    private bool isAttacking()
+    {
+        // is doing anything related to attack
+        return _isHeavyAttacking || _preAttacking_1 || _isAttacking_1 || _preAttacking_2 || _isAttacking_2;
     }
     #endregion
 }
