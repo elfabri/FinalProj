@@ -456,11 +456,12 @@ public class PlayerMovement : MonoBehaviour
             return LockState(PlayerAnimations.Attack_1, AttackStats.A1MinTime);
         }
 
+        if (_isGrounded && InputManager.Movement.magnitude != 0) return PlayerAnimations.Run;
+
         if (_preAttacking_1) return PlayerAnimations.PreAttack_1;
         if (_preAttacking_2) return PlayerAnimations.PreAttack_2;
 
-        if (_isGrounded)
-            return InputManager.Movement.magnitude == 0 ? PlayerAnimations.Idle : PlayerAnimations.Run;
+        if (_isGrounded) return PlayerAnimations.Idle;
 
         return VerticalVelocity > 0 ? PlayerAnimations.Jump : PlayerAnimations.Fall;
 
