@@ -12,5 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63e62fd9f5abe74ba599be0ae88939b, type: 3}
   m_Name: PlayerAttackStats
   m_EditorClassIdentifier: 
-  AttackComboTime: 0.2
-  AttackDisableTime: 3
+  A1MinTime: 0.2
+  A2MinTime: 0.2
+  HAMinTime: 0.4
+  TriggerComboTime: 0.558
+  TriggerHeavyTime: 1
