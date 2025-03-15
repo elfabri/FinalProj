@@ -22,12 +22,12 @@ public class PlayerMovement : MonoBehaviour
 
     // jump vars
     public float VerticalVelocity { get; private set; }
-    [SerializeField] private bool _isJumping;
+    private bool _isJumping;
     private bool _isFastFalling;
-    [SerializeField] private bool _isFalling;
+    private bool _isFalling;
     private float _fastFallTime;
     private float _fastFallReleaseSpeed;
-    [SerializeField] private int _numberOfJumpsUsed;
+    private int _numberOfJumpsUsed;
 
     // apex vars
     private float _apexPoint;
@@ -46,14 +46,19 @@ public class PlayerMovement : MonoBehaviour
     private Animator _anim;
     private float _lockedTill;
     private int _currentState;
-    [SerializeField] private bool _preAttacking_1;
-    [SerializeField] private bool _isAttacking_1;
-    [SerializeField] private bool _preAttacking_2;
-    [SerializeField] private bool _isAttacking_2;
-    [SerializeField] private bool _isHeavyAttacking;
-    [SerializeField] private float _attack_1_AnimTime;
-    [SerializeField] private float _attack_2_AnimTime;
-    [SerializeField] private float _attack_H_AnimTime;
+    private bool _preAttacking_1;
+    private bool _isAttacking_1;
+    private bool _preAttacking_2;
+    private bool _isAttacking_2;
+    private bool _isHeavyAttacking;
+    private float _attack_1_AnimTime;
+    private float _attack_2_AnimTime;
+    private float _attack_H_AnimTime;
+    [SerializeField] private bool _dead;
+    [SerializeField] private bool _hitted;
+    [SerializeField] private float _hittedAnimTime = 0.3f;
+    [SerializeField] private bool _criticalHitted;
+    [SerializeField] private float _criticHittedAnimTime = 0.3f;
     // jump and falling already asigned
 
     // attack vars
@@ -438,6 +443,20 @@ public class PlayerMovement : MonoBehaviour
         if (Time.time < _lockedTill) { return _currentState; }
 
         // most to less important
+        if (_dead) return PlayerAnimations.Death;
+
+        if (_hitted)
+        {
+            _hitted = false;
+            return LockState(PlayerAnimations.Hit, _hittedAnimTime);
+        }
+
+        if (_criticalHitted)
+        {
+            _criticalHitted = false;
+            return LockState(PlayerAnimations.CriticalHit, _criticHittedAnimTime);
+        }
+
         if (_isHeavyAttacking)
         {
             _isHeavyAttacking = false;

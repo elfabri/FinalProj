@@ -12,4 +12,7 @@ public class PlayerAnimations : ScriptableObject
     public static readonly int PreAttack_2 = Animator.StringToHash("PreAttack2");
     public static readonly int Attack_2 = Animator.StringToHash("Attack2");
     public static readonly int HeavyAttack = Animator.StringToHash("HeavyAttack");
+    public static readonly int Death = Animator.StringToHash("Death");
+    public static readonly int Hit = Animator.StringToHash("Hit");
+    public static readonly int CriticalHit = Animator.StringToHash("CriticHit");
 }
