@@ -334,7 +334,6 @@ public class PlayerMovement : MonoBehaviour
     #region Pause
     private void PauseChecks()
     {
-        // Jump button pressed
         if (InputManager.UiCancelPressed)
         {
             if (menuMan.Paused)
